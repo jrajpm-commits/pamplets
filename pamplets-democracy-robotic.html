@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NEON PAMPHLET STUDIO | Cyber Democracy Forge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0a0f, #030307);
+            font-family: 'Inter', 'SF Mono', 'Space Grotesk', system-ui, monospace;
+            padding: 1.5rem;
+            color: #eef5ff;
+        }
+
+        /* glassmorphic + neon controls */
+        .dashboard {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .studio-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            flex: 1.1;
+            min-width: 280px;
+            background: rgba(10, 20, 30, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .preview-area {
+            flex: 3;
+            min-width: 340px;
+        }
+
+        .ctrl-group {
+            margin-bottom: 1.6rem;
+        }
+
+        .ctrl-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #0ff;
+            text-shadow: 0 0 3px cyan;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 1.2rem;
+            border: 1px solid #0ff;
+            background: rgba(0, 0, 0, 0.7);
+            color: #0ff;
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        select option {
+            background: #111;
+            color: #0ff;
+        }
+
+        .color-swatch {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+        .color-opt {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: 0.1s;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .color-opt.active {
+            border: 3px solid white;
+            transform: scale(1.08);
+            box-shadow: 0 0 18px currentColor;
+        }
+        .template-badge {
+            display: inline-block;
+            background: rgba(0, 255, 255, 0.15);
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.7rem;
+            margin-right: 0.6rem;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+            font-weight: 600;
+            border: 1px solid cyan;
+            backdrop-filter: blur(4px);
+        }
+        .template-badge.active-temp {
+            background: #0ff;
+            color: black;
+            box-shadow: 0 0 12px cyan;
+            border-color: white;
+        }
+        .btn-reset {
+            background: linear-gradient(90deg, #0ff, #f0f);
+            border: none;
+            padding: 0.7rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+            color: black;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .neon-btn {
+            background: rgba(0,255,255,0.2);
+            border: 1px solid #0ff;
+            color: #0ff;
+        }
+        /* pamphlet card - high tech neon jazzy */
+        .pamphlet-card {
+            background: rgba(8, 12, 25, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            border: 1px solid rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 35px rgba(0, 255, 255, 0.3), 0 8px 32px rgba(0,0,0,0.4);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .pamphlet-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .pamphlet-panel {
+            padding: 1.8rem;
+            flex: 1 1 220px;
+            border-right: 1px solid rgba(0, 255, 255, 0.25);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.2s;
+            background: rgba(5, 10, 22, 0.5);
+        }
+
+        /* draggable logo zone */
+        .logo-dropzone {
+            border: 2px dashed #0ff;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 1.2rem;
+            padding: 0.6rem;
+            text-align: center;
+            transition: 0.2s;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(8px);
+        }
+        .logo-dropzone.drag-over {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #f0f;
+            box-shadow: 0 0 15px #0ff;
+        }
+        .logo-image {
+            max-width: 100%;
+            max-height: 70px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+        .remove-logo {
+            position: absolute;
+            top: -8px;
+            right: 4px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            color: #ff66cc;
+            border: 1px solid #f0f;
+        }
+        /* inplace editing */
+        .editable-text {
+            cursor: text;
+            transition: 0.1s;
+            border-radius: 12px;
+            padding: 2px 4px;
+        }
+        .editable-text:hover {
+            background: rgba(0, 255, 255, 0.2);
+            outline: 1px dashed #0ff;
+        }
+        [contenteditable="true"]:focus {
+            background: rgba(0, 255, 255, 0.3);
+            outline: 2px solid cyan;
+        }
+        .size-s .pamphlet-card { max-width: 400px; margin: 0 auto; }
+        .size-m .pamphlet-card { max-width: 780px; margin: 0 auto; }
+        .size-l .pamphlet-card { max-width: 1100px; margin: 0 auto; }
+        .size-full .pamphlet-card { max-width: 100%; }
+
+        .neon-glow-text {
+            text-shadow: 0 0 5px cyan, 0 0 2px magenta;
+        }
+        hr {
+            border-color: rgba(0,255,255,0.3);
+        }
+        button.download-btn {
+            background: linear-gradient(95deg, #0ff, #f0f);
+            border: none;
+            font-weight: bold;
+        }
+        .edit-mode-badge {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .toggle-edit {
+            background: rgba(0,255,255,0.2);
+            border: 1px solid cyan;
+            padding: 4px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
+        <h1 style="font-weight: 800; letter-spacing: -1px; background: linear-gradient(135deg, #0ff, #f0f); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 8px cyan;">⚡ CYBER PAMPHLET FORGE ⚡</h1>
+        <p style="color: #aaf;">drag & drop logo · in-place edit · neon aesthetics · tech democracy</p>
+    </div>
+
+    <div class="studio-panel">
+        <div class="controls">
+            <div class="ctrl-group">
+                <label>🌀 NEON CHROMATIC THEMES</label>
+                <div class="color-swatch" id="colorSwatches"></div>
+            </div>
+            <div class="ctrl-group">
+                <label>📐 SIZE PROFILE</label>
+                <select id="sizeSelect">
+                    <option value="size-s">SLIM CARD</option>
+                    <option value="size-m" selected>MEDIUM JAZZ</option>
+                    <option value="size-l">WIDE CUTOUT</option>
+                    <option value="size-full">FULL IMMERSE</option>
+                </select>
+            </div>
+            <div class="ctrl-group">
+                <label>✍️ TYPOGRAPHY VIBE</label>
+                <select id="fontTemplateSelect">
+                    <option value="tech-neon">TECH NEON · MONO</option>
+                    <option value="glow-sans">GLOW SANS · CYBER</option>
+                    <option value="futuristic">FUTURISTIC SERIF</option>
+                </select>
+            </div>
+            <div class="ctrl-group">
+                <label>🎭 LAYOUT PROFILE (CORE MESSAGE)</label>
+                <div id="profileList"></div>
+            </div>
+            <div class="edit-mode-badge">
+                <span style="font-size:0.7rem;">✏️ IN-PLACE EDIT:</span>
+                <div id="toggleEditBtn" class="toggle-edit">🔓 ENABLE EDIT MODE</div>
+            </div>
+            <button class="btn-reset" id="resetToDefault">⟳ RESET TO NEON DEFAULTS</button>
+            <button class="btn-reset download-btn" id="downloadPamphlet" style="margin-top: 12px;">📸 CAPTURE PNG (NEON SHOT)</button>
+            <p style="font-size: 9px; margin-top: 14px; opacity:0.7;">✨ Drag image/logo onto logo zones | Click any text to edit (edit mode ON)</p>
+        </div>
+
+        <div class="preview-area">
+            <div id="pamphletContainer" class="size-m">
+                <!-- dynamic pamphlet -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- HIGH TECH NEON COLOR THEMES ----------
+    const colorThemes = [
+        { name: "CYBER AQUA", primary: "#0ff", secondary: "#0a6c8c", accent: "#001e2a", textDark: "#e0f2fe", borderGlow: "#0ff", neonAccent: "#f0f", cardBg: "rgba(0, 20, 30, 0.7)" },
+        { name: "MAGENTA PROTOCOL", primary: "#f0f", secondary: "#a020f0", accent: "#2a0e3a", textDark: "#ffe6ff", borderGlow: "#f0f", neonAccent: "#0ff", cardBg: "rgba(30, 0, 40, 0.7)" },
+        { name: "ELECTRIC LIME", primary: "#aaff00", secondary: "#4c7a1a", accent: "#1a2a00", textDark: "#f4ffe0", borderGlow: "#b5ff00", neonAccent: "#0ff", cardBg: "rgba(20, 30, 0, 0.65)" },
+        { name: "ORACLE ORANGE", primary: "#ff5e00", secondary: "#b13e00", accent: "#2a1808", textDark: "#fff0e0", borderGlow: "#ff8c00", neonAccent: "#ff00aa", cardBg: "rgba(30, 12, 4, 0.7)" },
+        { name: "DEEP VOID VIOLET", primary: "#b967ff", secondary: "#6a1b9a", accent: "#15002b", textDark: "#f0e6ff", borderGlow: "#c084fc", neonAccent: "#0ff", cardBg: "rgba(12, 0, 24, 0.8)" }
+    ];
+
+    const layoutProfiles = [
+        { id: "tech_resist", name: "⚡ DIGITAL RESISTANCE", headline: "DECODE THE OLIGARCHY", sub: "Algorithms for equality. Laws for humans, not billionaires.", extraTag: "TECH X JUSTICE" },
+        { id: "rule_code", name: "🔐 RULE OF CODE / LAW", headline: "ONE PROTOCOL: JUSTICE", sub: "Immutable rule of law. No privileged classes.", extraTag: "BLOCKCHAIN DEMOCRACY" },
+        { id: "neon_equality", name: "🌈 NEON EQUALITY", headline: "VOICE 2.0 // RISE", sub: "Social class reset. Eradicate legacy nonsense.", extraTag: "INCLUSIVE CYBER" },
+        { id: "cyber_democracy", name: "🏛️ CYBER DEMOCRACY", headline: "DEMOCRACY 3.0", sub: "Rightful governance. People-owned future.", extraTag: "DIGITAL SOVEREIGNTY" }
+    ];
+
+    const defaultContent = {
+        panel2Bullets: [
+            "Rule of Law: Enforced by code, not corrupted by wealth.",
+            "Economic Justice: No laws favoring 1% over working class.",
+            "Eradicate Nonsense: Burn obsolete, anti-people regulations.",
+            "Digital Equality: Tech access = human right."
+        ],
+        panel3Text: "Join the cyber-assembly. Restore democracy by force of the people. Reject laws that serve the rich. Build a rightful future.",
+        agenda: "1. Audit unjust laws • 2. Direct action & digital campaigns • 3. Rise together",
+        meetingBlanks: "📅 DATE: ___________  ⏱ TIME: ___________\n📍 LOCATION / VIRTUAL HUB: ___________\n🔗 RSVP: ___________",
+        logoText: "DRAG LOGO HERE ⬇"
+    };
+
+    let currentColorIdx = 0;   // cyber aqua
+    let currentProfile = layoutProfiles[2]; // neon equality
+    let currentSize = "size-m";
+    let currentFont = "tech-neon";
+    let editMode = false;
+    let customLogoData = null;  // store base64 or null
+
+    // DOM refs
+    const container = document.getElementById("pamphletContainer");
+    const sizeSelect = document.getElementById("sizeSelect");
+    const fontSelect = document.getElementById("fontTemplateSelect");
+    const colorSwatchesDiv = document.getElementById("colorSwatches");
+    const profileListDiv = document.getElementById("profileList");
+    const resetBtn = document.getElementById("resetToDefault");
+    const downloadBtn = document.getElementById("downloadPamphlet");
+    const toggleEditBtn = document.getElementById("toggleEditBtn");
+
+    function renderColorSwatches() {
+        colorSwatchesDiv.innerHTML = "";
+        colorThemes.forEach((theme, idx) => {
+            const swatch = document.createElement("div");
+            swatch.className = `color-opt ${currentColorIdx === idx ? 'active' : ''}`;
+            swatch.style.backgroundColor = theme.primary;
+            swatch.style.boxShadow = `0 0 8px ${theme.primary}`;
+            swatch.title = theme.name;
+            swatch.addEventListener("click", () => {
+                currentColorIdx = idx;
+                renderColorSwatches();
+                renderPamphlet();
+            });
+            colorSwatchesDiv.appendChild(swatch);
+        });
+    }
+
+    function renderProfiles() {
+        profileListDiv.innerHTML = "";
+        layoutProfiles.forEach(prof => {
+            const badge = document.createElement("span");
+            badge.className = `template-badge ${currentProfile.id === prof.id ? 'active-temp' : ''}`;
+            badge.innerText = prof.name;
+            badge.addEventListener("click", () => {
+                currentProfile = prof;
+                renderProfiles();
+                renderPamphlet();
+            });
+            profileListDiv.appendChild(badge);
+        });
+    }
+
+    function getColors() { return colorThemes[currentColorIdx]; }
+
+    // attach drag-drop + in-place editing after render
+    function attachDragAndDropToZones() {
+        const dropZones = document.querySelectorAll('.logo-dropzone');
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('drag-over');
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        customLogoData = ev.target.result;
+                        renderPamphlet(); // re-render with new logo
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            zone.addEventListener('click', () => {
+                // optional file input click
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { customLogoData = ev.target.result; renderPamphlet(); };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                input.click();
+            });
+        });
+        // remove logo handler
+        const removeBtns = document.querySelectorAll('.remove-logo');
+        removeBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customLogoData = null;
+                renderPamphlet();
+            });
+        });
+    }
+
+    function attachInPlaceEditing() {
+        const editableElements = document.querySelectorAll('.editable-text');
+        editableElements.forEach(el => {
+            if (editMode) {
+                el.setAttribute('contenteditable', 'true');
+                el.setAttribute('data-old', el.innerText);
+                el.addEventListener('blur', function() {
+                    // optional sync to internal model but we keep live dom
+                });
+            } else {
+                el.setAttribute('contenteditable', 'false');
+                el.removeAttribute('data-old');
+            }
+        });
+    }
+
+    function renderPamphlet() {
+        const colors = getColors();
+        const profile = currentProfile;
+        const bullets = [...defaultContent.panel2Bullets];
+        if (currentProfile.id === "tech_resist") bullets.push("🤖 Tech autonomy > corporate greed");
+        if (currentProfile.id === "rule_code") bullets.push("⚖️ Smart contracts for justice");
+        if (currentProfile.id === "neon_equality") bullets.push("🌈 Class equality = system upgrade");
+        if (currentProfile.id === "cyber_democracy") bullets.push("🗳️ Liquid democracy, rightful voice");
+
+        const logoHtml = customLogoData 
+            ? `<div class="logo-dropzone" style="position:relative;"><img src="${customLogoData}" class="logo-image" alt="logo"><span class="remove-logo">🗑️ REMOVE</span></div>`
+            : `<div class="logo-dropzone">⬇️ DRAG & DROP LOGO / CLICK ⬇️<br><span style="font-size:10px;">${defaultContent.logoText}</span></div>`;
+
+        const agendaHtml = `<div style="margin: 0.7rem 0; font-family: monospace; border-left: 3px solid ${colors.primary}; padding-left: 10px;">⚡ ${profile.extraTag} · ${defaultContent.agenda}</div>`;
+        
+        const meetingHtml = `<div class="meeting-blank" style="background: rgba(0,255,255,0.1); border-radius: 1rem; padding: 0.7rem; margin-top: 0.7rem; border:1px solid ${colors.primary};">✍️ MEETING DETAILS (fill blanks)<br><span style="white-space: pre-line;">${defaultContent.meetingBlanks}</span></div>`;
+
+        const fontClass = currentFont === 'tech-neon' ? 'font-mono' : (currentFont === 'glow-sans' ? 'font-sans' : 'font-serif');
+        const additionalFontStyle = currentFont === 'tech-neon' ? "font-family: 'Space Mono', 'Fira Code', monospace; letter-spacing: -0.2px;" : (currentFont === 'glow-sans' ? "font-family: 'Inter', 'Segoe UI', system-ui; font-weight: 500;" : "font-family: 'Cormorant Garamond', Georgia, serif;");
+
+        const html = `
+            <div class="pamphlet-card" style="background: ${colors.cardBg}; border-color: ${colors.borderGlow}; box-shadow: 0 0 28px ${colors.borderGlow}80;">
+                <div class="pamphlet-grid" style="${additionalFontStyle} color: ${colors.textDark};">
+                    <div class="pamphlet-panel" style="background: rgba(0,0,0,0.45); border-right-color: ${colors.borderGlow}40;">
+                        ${logoHtml}
+                        <h1 class="editable-text" style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, ${colors.primary}, ${colors.neonAccent}); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 6px ${colors.primary};">${profile.headline}</h1>
+                        <p class="editable-text" style="margin: 0.8rem 0; font-weight: 400;">${profile.sub} · ${defaultContent.panel3Text.slice(0,80)}</p>
+                        <hr>
+                        <div style="font-size:0.7rem; text-transform:uppercase;">⚡ #RiseForDemocracy</div>
+                    </div>
+                    <div class="pamphlet-panel">
+                        <h2 class="editable-text" style="color: ${colors.primary}; border-left: 4px solid ${colors.primary}; padding-left: 8px;">📡 WHY WE RISE (CYBER MANIFESTO)</h2>
+                        <ul style="margin-top: 1rem; list-style: none;">
+                            ${bullets.map(b => `<li style="margin-bottom: 0.6rem; display: flex; gap: 0.6rem;"><span style="color: ${colors.primary}; text-shadow:0 0 3px ${colors.primary};">➤</span> <span class="editable-text">${b}</span></li>`).join('')}
+                        </ul>
+                        <div style="margin-top: 1rem; background: rgba(0,255,255,0.1); border-radius: 1rem; padding: 0.5rem; text-align:center;" class="editable-text">🔥 ERADICATE THE NONSENSE · TECH x JUSTICE</div>
+                    </div>
+                    <div class="pamphlet-panel">
+                        <h3 class="editable-text" style="color: ${colors.primary};">📢 CYBER ASSEMBLY: RISE</h3>
+                        <p class="editable-text">${defaultContent.panel3Text}</p>
+                        ${agendaHtml}
+                        ${meetingHtml}
+                        <div style="margin-top: 0.8rem; background: ${colors.primary}20; padding: 0.3rem; border-radius: 2rem; text-align:center; backdrop-filter: blur(4px);" class="editable-text">✊ VOICE OF RISE · RIGHTFUL DEMOCRACY</div>
+                    </div>
+                    <div class="pamphlet-panel" style="border-bottom: none;">
+                        <div style="text-align: center;">
+                            <div class="editable-text" style="font-weight: bold; font-size: 1rem;">⚡ ACTIVATE</div>
+                            <div style="margin-top: 0.5rem; font-size:0.7rem;">#NoLawsForRich #EqualClass</div>
+                            <div style="margin-top: 0.7rem;"><span style="background: ${colors.primary}; color: black; padding: 0.2rem 1rem; border-radius: 2rem;">JOIN THE MOVEMENT</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        container.className = currentSize;
+        attachDragAndDropToZones();
+        attachInPlaceEditing();
+    }
+
+    function syncFromUI() {
+        currentSize = sizeSelect.value;
+        currentFont = fontSelect.value;
+        renderPamphlet();
+    }
+
+    function resetToDefault() {
+        currentColorIdx = 0;  // cyber aqua
+        currentProfile = layoutProfiles[2]; // neon equality
+        currentSize = "size-m";
+        currentFont = "tech-neon";
+        customLogoData = null;
+        sizeSelect.value = "size-m";
+        fontSelect.value = "tech-neon";
+        editMode = false;
+        toggleEditBtn.innerHTML = "🔓 ENABLE EDIT MODE";
+        renderColorSwatches();
+        renderProfiles();
+        renderPamphlet();
+    }
+
+    function toggleEditMode() {
+        editMode = !editMode;
+        toggleEditBtn.innerHTML = editMode ? "🔒 EDIT MODE ACTIVE (click any text)" : "🔓 ENABLE EDIT MODE";
+        renderPamphlet(); // re-render to attach contenteditable based on mode
+    }
+
+    // download with html2canvas
+    function downloadPamphletImage() {
+        const element = document.querySelector(".pamphlet-card");
+        if (!element) return;
+        if (typeof html2canvas === 'undefined') {
+            alert("Loading html2canvas ... try again in 2 sec");
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+            script.onload = () => alert("Library ready! Click download again.");
+            document.head.appendChild(script);
+            return;
+        }
+        html2canvas(element, { scale: 2.2, backgroundColor: null, allowTaint: false, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'neon_pamphlet_democracy.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => alert("screenshot error: " + err));
+    }
+
+    sizeSelect.addEventListener("change", syncFromUI);
+    fontSelect.addEventListener("change", syncFromUI);
+    resetBtn.addEventListener("click", resetToDefault);
+    downloadBtn.addEventListener("click", downloadPamphletImage);
+    toggleEditBtn.addEventListener("click", toggleEditMode);
+    
+    function init() {
+        renderColorSwatches();
+        renderProfiles();
+        renderPamphlet();
+    }
+    init();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>
