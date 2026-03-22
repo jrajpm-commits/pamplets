@@ -144,20 +144,27 @@
             transition: all 0.2s;
         }
 
-        .size-s {
-            max-width: 380px;
+        /* Enable resizing on the container, use width instead of max-width to allow drag-expansion */
+        #pamphletContainer {
+            resize: both;
+            overflow: hidden; /* required for resize handle */
+            padding: 30px; /* space for shadow */
             margin: 0 auto;
+            min-width: 340px;
+            border: 1px dashed rgba(0,0,0,0.1); /* visual cue */
+        }
+
+        .size-s {
+            width: 380px;
         }
         .size-m {
-            max-width: 720px;
-            margin: 0 auto;
+            width: 720px;
         }
         .size-l {
-            max-width: 1000px;
-            margin: 0 auto;
+            width: 1000px;
         }
         .size-full {
-            max-width: 100%;
+            width: 100%;
         }
 
         /* base template styles */
@@ -241,9 +248,51 @@
             justify-content: space-between;
             align-items: center;
         }
+        /* Edit mode styles */
+        .editable-highlight {
+            outline: 2px dashed #ec4899;
+            outline-offset: 2px;
+            cursor: text;
+        }
+        .format-toolbar {
+            display: none; /* hidden by default, shown in edit mode */
+            gap: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .fmt-btn { cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc; padding: 4px 8px; border-radius: 4px; font-weight:bold; }
+        .fmt-btn:hover { background: #e2e8f0; }
+        
+        /* App Nav */
+        .nav-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; width: 100%; }
+        .app-nav { display: flex; gap: 1rem; background: white; padding: 0.6rem 1.2rem; border-radius: 1rem; width: fit-content; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 0.85rem; font-weight: 600; align-items: center; }
+        .app-nav a { text-decoration: none; color: #64748b; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .app-nav a:hover { color: #0f172a; }
+        .app-nav .divider { width: 1px; height: 16px; background: #cbd5e1; }
+        .link-cyber { color: #d946ef !important; }
+        .link-cyber:hover { text-shadow: 0 0 10px #f0abfc; }
+        /* Screen Watermark Footer */
+        .screen-watermark { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 100; font-size: 0.75rem; opacity: 0.6; font-family: sans-serif; color: #475569; }
+        /* Preload html2canvas */
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BMjQ8Gm5m4R+aQdgnzNq/OFjvK2U/fA/YBjCzUEvihhP9Z1N4i3OeGm4xT8f/JkhsVh9TqfGQlslxLR8aRA8UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
+<div class="nav-wrapper">
+    <nav class="app-nav">
+        <a href="index.html">🏠 Home</a>
+        <div class="divider"></div>
+        <a href="pamplate_studio.html" style="color: #0f172a; cursor: default;">✒️ Classic Studio</a>
+        <div class="divider"></div>
+        <a href="pamplets-democracy-robotic.html" class="link-cyber">⚡ Cyber Forge</a>
+    </nav>
+</div>
+
 <div class="dashboard">
     <h1 style="font-weight: 700; margin-bottom: 0.25rem;">✊ Pamphlet Forge — Democracy & Rule of Law</h1>
     <p style="margin-bottom: 1.5rem; color: #334155;">Generate variations: templates, colors, sizes, text profiles</p>
@@ -263,6 +312,11 @@
                     <option value="size-l">Large (wide format)</option>
                     <option value="size-full">Full bleed / poster</option>
                 </select>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.7rem; color: #334155;">WIDTH:</span>
+                    <input type="range" id="customWidthRange" min="320" max="1400" step="10" style="flex:1; cursor: pointer;">
+                    <span id="widthDisp" style="font-size: 0.7rem; color: #334155; width: 50px; text-align: right;">AUTO</span>
+                </div>
             </div>
             <div class="ctrl-group">
                 <label>✍️ Typography Template</label>
@@ -284,6 +338,14 @@
                 <label>📝 Meeting Details (leave blanks if you want)</label>
                 <textarea id="meetingDetailsOverride" rows="3" placeholder="Date: _____&#10;Time: _____&#10;Location: _____&#10;RSVP: _____"></textarea>
             </div>
+            <div class="ctrl-group">
+                <label>✏️ In-Place Content</label>
+                <button class="btn-reset" id="toggleEditBtn" style="background: #db2777;">🔓 Enable Edit Mode</button>
+            </div>
+            <div class="ctrl-group" style="display:flex; gap:10px; margin-bottom: 0;">
+                <button class="btn-reset" id="saveSessionBtn" style="background: #059669; flex:1; margin-top:0;">💾 Save Session</button>
+                <button class="btn-reset" id="loadSessionBtn" style="background: #0284c7; flex:1; margin-top:0;">📂 Load Session</button>
+            </div>
             <button class="btn-reset" id="resetToDefault">⟳ Reset to default message & colors</button>
             <button class="btn-reset" id="downloadPamphlet" style="background: #4f46e5; margin-top: 10px;">⬇️ Download as PNG (screenshot style)</button>
             <p style="font-size: 11px; margin-top: 12px; color: #475569;">*Logo space auto-generated. Blanks ready for your meeting info.</p>
@@ -291,6 +353,18 @@
 
         <!-- preview -->
         <div class="preview-area">
+            <div id="formattingToolbar" class="format-toolbar">
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('bold',false,null)">B</button>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('italic',false,null)">I</button>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('underline',false,null)">U</button>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('strikeThrough',false,null)">S</button>
+                <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('justifyLeft',false,null)">⬅</button>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('justifyCenter',false,null)">⬇</button>
+                <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('justifyRight',false,null)">⮕</button>
+                <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
+                <input type="color" onchange="document.execCommand('foreColor',false,this.value)" title="Text Color" style="width:30px; height:30px; padding:0; border:none; cursor:pointer;">
+            </div>
             <div id="pamphletContainer" class="size-m">
                 <!-- dynamic pamphlet injected here -->
             </div>
@@ -339,6 +413,15 @@
     let currentFontTemplate = "template-classic";
     let customHeadline = "";
     let customMeetingText = "";
+    let customWidthVal = null; // stores manual width override
+    
+    // Edit Mode State
+    let isEditMode = false;
+    let customSubhead = "";
+    let customPanel2Title = "";
+    let customPanel3Title = "";
+    let customPanel3Text = "";
+    let customBulletsHtml = "";
 
     // DOM elements
     const container = document.getElementById("pamphletContainer");
@@ -349,6 +432,9 @@
     const customHeadlineInput = document.getElementById("customHeadline");
     const meetingOverride = document.getElementById("meetingDetailsOverride");
     const resetBtn = document.getElementById("resetToDefault");
+    const toggleEditBtn = document.getElementById("toggleEditBtn");
+    const saveBtn = document.getElementById("saveSessionBtn");
+    const loadBtn = document.getElementById("loadSessionBtn");
     const downloadBtn = document.getElementById("downloadPamphlet");
 
     // build color swatches
@@ -387,15 +473,52 @@
         return colorThemes[currentColorIdx];
     }
 
+    // --- SECURITY: Sanitize Inputs to prevent injection ---
+    function sanitizeHTML(html) {
+        if (!html) return "";
+        const temp = document.createElement('div');
+        temp.textContent = html; // Default to text to strip tags if it's from a raw input
+        // If it looks like rich text from our editor, allow specific tags
+        if (html.includes('<') && html.includes('>')) {
+            temp.innerHTML = html;
+            // Remove scripts, frames, and event handlers (on*)
+            temp.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
+            temp.querySelectorAll('*').forEach(el => {
+                Array.from(el.attributes).forEach(attr => {
+                    if (attr.name.startsWith('on') || attr.value.trim().toLowerCase().startsWith('javascript:')) {
+                        el.removeAttribute(attr.name);
+                    }
+                });
+            });
+            return temp.innerHTML;
+        }
+        return temp.innerHTML; // returns escaped text for plain inputs
+    }
+    // Helper to allow bold/italic but strip scripts (for contenteditable variables)
+    function sanitizeRich(html) {
+        if (!html) return "";
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        temp.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
+        temp.querySelectorAll('*').forEach(el => {
+            Array.from(el.attributes).forEach(attr => {
+                if (attr.name.startsWith('on')) el.removeAttribute(attr.name);
+            });
+        });
+        return temp.innerHTML;
+    }
+
     function renderPamphlet() {
         const colors = getActiveColors();
         const profile = currentProfile;
+        // Use sanitizeHTML for standard inputs, sanitizeRich for html vars
         let headlineText = customHeadlineInput.value.trim() !== "" ? customHeadlineInput.value.trim() : profile.headline;
         let meetingTextRaw = meetingOverride.value.trim() !== "" ? meetingOverride.value.trim() : defaultPamphletContent.meetingBlanks;
         
         // Build dynamic panels
-        const panel1Head = headlineText;
-        const panel1Sub = profile.sub + " • " + defaultPamphletContent.panel1Sub;
+        const panel1Head = sanitizeRich(headlineText);
+        // Use custom subhead if edited, else combine profile + default
+        const panel1Sub = customSubhead !== "" ? sanitizeRich(customSubhead) : (profile.sub + " • " + defaultPamphletContent.panel1Sub);
         
         // bullet list from default + extra flavor from profile
         let bulletItems = [...defaultPamphletContent.panel2Bullets];
@@ -404,38 +527,56 @@
         if (profile.id === "profile_equality") bulletItems.push("🏳️‍🌈 Bridging social classes, universal dignity");
         if (profile.id === "profile_democracy") bulletItems.push("🗳️ Fair representation, end gerrymandering");
 
-        const panel3Title = "📢 " + defaultPamphletContent.panel3Title;
+        const panel3Title = customPanel3Title !== "" ? sanitizeRich(customPanel3Title) : ("📢 " + defaultPamphletContent.panel3Title);
         const agendaHtml = `<div class="profile-tag" style="margin: 0.5rem 0;">⚡ ${profile.extraTag} • ${defaultPamphletContent.agenda}</div>`;
 
+        // Helper for editable attrs
+        const editAttr = isEditMode ? 'contenteditable="true" class="editable-highlight"' : '';
+
         // meeting blanks styled
-        const meetingHtml = `<div class="meeting-blank" style="background: ${colors.accent}; border-left: 4px solid ${colors.primary};">✍️ <strong>MEETING DETAILS (fill the blanks)</strong><br>${meetingTextRaw.replace(/\n/g, '<br>')}</div>`;
+        // We sanitize meetingTextRaw to prevent injection, then convert newlines to <br>
+        const meetingHtml = `<div class="meeting-blank ${isEditMode ? 'editable-highlight' : ''}" id="liveMeeting" ${isEditMode ? 'contenteditable="true"' : ''} style="background: ${colors.accent}; border-left: 4px solid ${colors.primary};">✍️ <strong>MEETING DETAILS (fill the blanks)</strong><br>${sanitizeHTML(meetingTextRaw).replace(/\n/g, '<br>')}</div>`;
         
         const logoHtml = `<div class="logo-placeholder" style="border-color: ${colors.primary}; color: ${colors.primary};">🏛️ ${defaultPamphletContent.logoText} — [SPACE FOR YOUR LOGO]</div>`;
 
+        // Panel 2 List Logic
+        let listHtml = "";
+        if (customBulletsHtml !== "") {
+             listHtml = `<ul id="liveBullets" ${editAttr} style="margin-top: 0.8rem; list-style-type: none; padding-left: 0;">${sanitizeRich(customBulletsHtml)}</ul>`;
+        } else {
+             listHtml = `<ul id="liveBullets" ${editAttr} style="margin-top: 0.8rem; list-style-type: none; padding-left: 0;">
+                 ${bulletItems.map(item => `<li style="margin-bottom: 0.6rem; display: flex; gap: 0.5rem;"><span style="color: ${colors.primary}; font-weight: bold;">➤</span> ${item}</li>`).join('')}
+             </ul>`;
+        }
+
+        // Watermark HTML for the card itself (visible in download)
+        const watermarkHtml = `
+            <div style="position: absolute; bottom: 12px; left: 18px; font-size: 0.6rem; opacity: 0.5; font-weight: 500; pointer-events: none;">(c) mots.ai</div>
+            <div style="position: absolute; bottom: 12px; right: 18px; font-size: 0.6rem; opacity: 0.5; font-weight: 500; pointer-events: none;">AIPC Thane</div>
+        `;
+
         const htmlContent = `
-            <div class="pamphlet-card" style="background: white; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);">
+            <div class="pamphlet-card" style="min-height: 100%; background: white; border-radius: 1.5rem; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2); position: relative;">
                 <div class="pamphlet-inner ${currentFontTemplate}" style="color: ${colors.textDark};">
                     <div class="pamphlet-grid">
                         <!-- Panel 1: Front cover / hero -->
                         <div class="pamphlet-panel" style="background: ${colors.primary}; color: white; border-right: 1px solid rgba(255,255,255,0.2);">
                             ${logoHtml.replace(`border-color: ${colors.primary}`, `border-color: white; color: white; background: rgba(255,255,255,0.15);`)}
-                            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; line-height: 1.2;">${panel1Head}</h1>
-                            <p style="font-size: 0.95rem; opacity: 0.92;">${panel1Sub}</p>
+                            <h1 id="liveHeadline" ${editAttr} style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; line-height: 1.2;">${panel1Head}</h1>
+                            <p id="liveSubhead" ${editAttr} style="font-size: 0.95rem; opacity: 0.92;">${panel1Sub}</p>
                             <hr style="margin: 1rem 0; border-color: rgba(255,255,255,0.3);">
                             <div style="font-size: 0.8rem; font-weight: 500;">✊ #VoiceOfRise  •  RuleOfLaw</div>
                         </div>
                         <!-- Panel 2: Diagnosis -->
                         <div class="pamphlet-panel" style="background: ${colors.accent};">
-                            <h2 style="color: ${colors.primary}; border-left: 4px solid ${colors.primary}; padding-left: 0.6rem;">📌 ${defaultPamphletContent.panel2Title}</h2>
-                            <ul style="margin-top: 0.8rem; list-style-type: none; padding-left: 0;">
-                                ${bulletItems.map(item => `<li style="margin-bottom: 0.6rem; display: flex; gap: 0.5rem;"><span style="color: ${colors.primary}; font-weight: bold;">➤</span> ${item}</li>`).join('')}
-                            </ul>
+                            <h2 id="livePanel2Title" ${editAttr} style="color: ${colors.primary}; border-left: 4px solid ${colors.primary}; padding-left: 0.6rem;">📌 ${customPanel2Title ? sanitizeRich(customPanel2Title) : defaultPamphletContent.panel2Title}</h2>
+                            ${listHtml}
                             <div style="margin-top: 1rem; font-weight: 600; background: white; border-radius: 1rem; padding: 0.6rem; font-size: 0.8rem; text-align: center; color: ${colors.primary};">⚡ Eradicate the nonsense — equality now</div>
                         </div>
                         <!-- Panel 3: Call to action -->
                         <div class="pamphlet-panel" style="background: white;">
-                            <h3 style="color: ${colors.primary};">${panel3Title}</h3>
-                            <p style="font-size: 0.85rem;">${defaultPamphletContent.panel3Text}</p>
+                            <h3 id="livePanel3Title" ${editAttr} style="color: ${colors.primary};">${panel3Title}</h3>
+                            <p id="livePanel3Text" ${editAttr} style="font-size: 0.85rem;">${customPanel3Text ? sanitizeRich(customPanel3Text) : defaultPamphletContent.panel3Text}</p>
                             ${agendaHtml}
                             ${meetingHtml}
                             <div style="margin-top: 0.8rem; font-size: 0.7rem; text-align: center; background: ${colors.secondary}; padding: 0.4rem; border-radius: 2rem;">
@@ -451,6 +592,7 @@
                                 <div style="margin-top: 1rem;"><span style="background: ${colors.primary}; color: white; padding: 0.2rem 1rem; border-radius: 2rem;">#RiseForDemocracy</span></div>
                             </div>
                         </div>
+                        ${watermarkHtml}
                     </div>
                 </div>
             </div>
@@ -459,6 +601,48 @@
         container.innerHTML = htmlContent;
         // apply size class
         container.className = currentSize;
+
+        // Apply custom width if set (persists across re-renders)
+        if (customWidthVal) {
+            container.className = ""; // clear preset classes
+            container.style.maxWidth = customWidthVal + "px";
+            container.style.width = customWidthVal + "px";
+        } else {
+            container.style.maxWidth = ""; 
+        }
+        
+        attachLiveListeners();
+    }
+
+    function attachLiveListeners() {
+        if (!isEditMode) return;
+        
+        const map = [
+            { id: 'liveHeadline', type: 'headline' },
+            { id: 'liveSubhead', type: 'subhead' },
+            { id: 'livePanel2Title', type: 'p2title' },
+            { id: 'livePanel3Title', type: 'p3title' },
+            { id: 'livePanel3Text', type: 'p3text' },
+            { id: 'liveMeeting', type: 'meeting' },
+            { id: 'liveBullets', type: 'bullets' }
+        ];
+
+        map.forEach(item => {
+            const el = document.getElementById(item.id);
+            if (el) {
+                el.addEventListener('input', (e) => {
+                    const val = e.target.innerHTML; // Use innerHTML to capture bold/color/formatting
+                    if (item.type === 'headline') customHeadlineInput.value = e.target.innerText; // Keep input clean
+                    if (item.type === 'subhead') customSubhead = val;
+                    if (item.type === 'p2title') customPanel2Title = val;
+                    if (item.type === 'p3title') customPanel3Title = val;
+                    if (item.type === 'p3text') customPanel3Text = val;
+                    if (item.type === 'bullets') customBulletsHtml = e.target.innerHTML; // save html for list
+                    // Meeting special case: just sync back to text area roughly
+                    if (item.type === 'meeting') meetingOverride.value = val.replace("✍️ MEETING DETAILS (fill the blanks)", "").trim();
+                });
+            }
+        });
     }
 
     // sync controls and re-render
@@ -473,6 +657,12 @@
         currentProfile = layoutProfiles[2]; // equality
         currentSize = "size-m";
         currentFontTemplate = "template-classic";
+        customSubhead = "";
+        customPanel2Title = "";
+        customPanel3Title = "";
+        customPanel3Text = "";
+        customBulletsHtml = "";
+        customWidthVal = null;
         customHeadlineInput.value = "";
         meetingOverride.value = defaultPamphletContent.meetingBlanks;
         sizeSelect.value = "size-m";
@@ -480,20 +670,86 @@
         renderColorSwatches();
         renderProfiles();
         syncFromUI();
+        if(document.getElementById('widthDisp')) document.getElementById('widthDisp').innerText = "AUTO";
+        if(document.getElementById('customWidthRange')) document.getElementById('customWidthRange').value = 720;
+    }
+
+    // --- Local Storage Logic ---
+    function saveSession() {
+        const sessionData = {
+            currentColorIdx,
+            profileId: currentProfile.id,
+            currentSize,
+            currentFontTemplate,
+            customHeadline: customHeadlineInput.value,
+            meetingDetails: meetingOverride.value,
+            customWidthVal,
+            isEditMode,
+            customSubhead,
+            customPanel2Title,
+            customPanel3Title,
+            customPanel3Text,
+            customBulletsHtml
+        };
+        localStorage.setItem("pamphlet_studio_save", JSON.stringify(sessionData));
+        alert("✅ Session saved to local storage! You can reload this page and click 'Load Session' to restore it.");
+    }
+
+    function loadSession() {
+        const dataStr = localStorage.getItem("pamphlet_studio_save");
+        if (!dataStr) return alert("❌ No saved session found in local storage.");
+        
+        try {
+            const data = JSON.parse(dataStr);
+            
+            // Restore settings
+            currentColorIdx = data.currentColorIdx ?? 2;
+            const foundProfile = layoutProfiles.find(p => p.id === data.profileId);
+            if (foundProfile) currentProfile = foundProfile;
+            
+            currentSize = data.currentSize || "size-m";
+            currentFontTemplate = data.currentFontTemplate || "template-classic";
+            customHeadlineInput.value = data.customHeadline || "";
+            meetingOverride.value = data.meetingDetails || "";
+            
+            // Restore custom text vars
+            customWidthVal = data.customWidthVal;
+            isEditMode = !!data.isEditMode;
+            customSubhead = data.customSubhead || "";
+            customPanel2Title = data.customPanel2Title || "";
+            customPanel3Title = data.customPanel3Title || "";
+            customPanel3Text = data.customPanel3Text || "";
+            customBulletsHtml = data.customBulletsHtml || "";
+
+            // Update UI inputs to match data
+            sizeSelect.value = currentSize;
+            fontSelect.value = currentFontTemplate;
+            
+            if (customWidthVal) {
+                document.getElementById('widthDisp').innerText = customWidthVal + "px";
+                document.getElementById('customWidthRange').value = customWidthVal;
+            } else {
+                document.getElementById('widthDisp').innerText = "AUTO";
+            }
+
+            toggleEditBtn.innerHTML = isEditMode ? "🔓 EDIT MODE: ON" : "🔒 ENABLE EDIT MODE";
+            toggleEditBtn.style.background = isEditMode ? "#be185d" : "#db2777";
+            document.getElementById('formattingToolbar').style.display = isEditMode ? "flex" : "none";
+
+            renderColorSwatches();
+            renderProfiles();
+            renderPamphlet();
+            alert("✅ Session loaded successfully.");
+        } catch (e) {
+            console.error(e);
+            alert("Error loading session data.");
+        }
     }
 
     // download as PNG using html2canvas (we need to inject library dynamically or use built-in? we'll add CDN)
     function downloadPamphletImage() {
         const element = document.querySelector(".pamphlet-card");
         if (!element) return;
-        if (typeof html2canvas === 'undefined') {
-            alert("Please wait, loading html2canvas library... Download will be available in 2 seconds. Try again.");
-            const script = document.createElement('script');
-            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-            script.onload = () => { alert("Library ready! Click download again."); };
-            document.head.appendChild(script);
-            return;
-        }
         html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'pamphlet-democracy.png';
@@ -503,11 +759,36 @@
     }
 
     // Event listeners
-    sizeSelect.addEventListener("change", syncFromUI);
+    sizeSelect.addEventListener("change", (e) => {
+        customWidthVal = null; // reset custom manual width on preset change
+        if(document.getElementById('widthDisp')) document.getElementById('widthDisp').innerText = "AUTO";
+        syncFromUI();
+    });
+
+    // Custom Width Slider Listener
+    document.getElementById("customWidthRange").addEventListener("input", (e) => {
+        customWidthVal = e.target.value;
+        document.getElementById('widthDisp').innerText = customWidthVal + "px";
+        // renderPamphlet(); // Optional: don't re-render full HTML on slide, just style
+        container.style.width = customWidthVal + "px";
+    });
+
     fontSelect.addEventListener("change", syncFromUI);
     customHeadlineInput.addEventListener("input", () => renderPamphlet());
     meetingOverride.addEventListener("input", () => renderPamphlet());
     resetBtn.addEventListener("click", resetToDefault);
+    
+    toggleEditBtn.addEventListener("click", () => {
+        isEditMode = !isEditMode;
+        toggleEditBtn.innerHTML = isEditMode ? "🔓 EDIT MODE: ON" : "🔒 ENABLE EDIT MODE";
+        toggleEditBtn.style.background = isEditMode ? "#be185d" : "#db2777";
+        document.getElementById('formattingToolbar').style.display = isEditMode ? "flex" : "none";
+        renderPamphlet();
+    });
+    
+    saveBtn.addEventListener("click", saveSession);
+    loadBtn.addEventListener("click", loadSession);
+    
     downloadBtn.addEventListener("click", downloadPamphletImage);
     
     // init
@@ -519,7 +800,10 @@
     }
     init();
 </script>
+<div class="screen-watermark">
+    <span>(c) mots.ai</span>
+    <span>AIPC Thane</span>
+</div>
 <!-- include html2canvas for PNG export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BMjQ8Gm5m4R+aQdgnzNq/OFjvK2U/fA/YBjCzUEvihhP9Z1N4i3OeGm4xT8f/JkhsVh9TqfGQlslxLR8aRA8UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
