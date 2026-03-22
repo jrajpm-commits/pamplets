@@ -552,7 +552,7 @@
 
         // meeting blanks styled
         // We sanitize meetingTextRaw to prevent injection, then convert newlines to <br>
-        const meetingHtml = `<div class="meeting-blank ${isEditMode ? 'editable-highlight' : ''}" id="liveMeeting" ${isEditMode ? 'contenteditable="true"' : ''} style="background: ${colors.accent}; border-left: 4px solid ${colors.primary};">✍️ <strong>MEETING DETAILS (fill the blanks)</strong><br>${sanitizeHTML(meetingTextRaw).replace(/\n/g, '<br>')}</div>`;
+        const meetingHtml = `<div class="meeting-blank ${isEditMode ? 'editable-highlight' : ''}" id="liveMeeting" ${isEditMode ? 'contenteditable="true"' : ''} style="background: ${colors.accent}; border-left: 4px solid ${colors.primary};">✍️ <strong>MEETING DETAILS</strong><br>${sanitizeHTML(meetingTextRaw).replace(/\n/g, '<br>')}</div>`;
         
         const logoHtml = `<div class="logo-placeholder" style="border-color: ${colors.primary}; color: ${colors.primary};">🏛️ ${defaultPamphletContent.logoText} — [SPACE FOR YOUR LOGO]</div>`;
 
