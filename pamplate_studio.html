@@ -280,7 +280,7 @@
         .screen-watermark { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; pointer-events: none; z-index: 100; font-size: 0.75rem; opacity: 0.6; font-family: sans-serif; color: #475569; }
         /* Preload html2canvas */
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BMjQ8Gm5m4R+aQdgnzNq/OFjvK2U/fA/YBjCzUEvihhP9Z1N4i3OeGm4xT8f/JkhsVh9TqfGQlslxLR8aRA8UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="nav-wrapper">
@@ -364,6 +364,17 @@
                 <button class="fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('justifyRight',false,null)">⮕</button>
                 <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
                 <input type="color" onchange="document.execCommand('foreColor',false,this.value)" title="Text Color" style="width:30px; height:30px; padding:0; border:none; cursor:pointer;">
+                <div style="width:1px; height:20px; background:#ccc; margin:0 5px;"></div>
+                <select onchange="document.execCommand('fontSize',false,this.value); this.value='';" style="width: auto; padding: 2px 6px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem; cursor:pointer;" title="Font Size">
+                    <option value="">Size</option>
+                    <option value="1">XS</option>
+                    <option value="2">S</option>
+                    <option value="3">M</option>
+                    <option value="4">L</option>
+                    <option value="5">XL</option>
+                    <option value="6">XXL</option>
+                    <option value="7">Huge</option>
+                </select>
             </div>
             <div id="pamphletContainer" class="size-m">
                 <!-- dynamic pamphlet injected here -->
@@ -379,7 +390,13 @@
         { name: "Bold Red/White", primary: "#b91c1c", secondary: "#fecaca", accent: "#fff5f5", textDark: "#7f1a1a", borderLight: "#ef4444" },
         { name: "Deep Blue Trust", primary: "#1e3a8a", secondary: "#bfdbfe", accent: "#eff6ff", textDark: "#0c2e6e", borderLight: "#3b82f6" },
         { name: "Grassroots Green", primary: "#166534", secondary: "#bbf7d0", accent: "#f0fdf4", textDark: "#14532d", borderLight: "#22c55e" },
-        { name: "Sovereign Gold", primary: "#b45309", secondary: "#fed7aa", accent: "#fffbeb", textDark: "#7c2d12", borderLight: "#f59e0b" }
+        { name: "Sovereign Gold", primary: "#b45309", secondary: "#fed7aa", accent: "#fffbeb", textDark: "#7c2d12", borderLight: "#f59e0b" },
+        // Cyber Themes adapted for Light Mode
+        { name: "Cyber Aqua (Light)", primary: "#0891b2", secondary: "#cffafe", accent: "#ecfeff", textDark: "#164e63", borderLight: "#22d3ee" },
+        { name: "Magenta Proto (Light)", primary: "#c026d3", secondary: "#f5d0fe", accent: "#fdf4ff", textDark: "#701a75", borderLight: "#e879f9" },
+        { name: "Lime Wire (Light)", primary: "#65a30d", secondary: "#ecfccb", accent: "#f7fee7", textDark: "#365314", borderLight: "#a3e635" },
+        { name: "Oracle Orange (Light)", primary: "#ea580c", secondary: "#ffedd5", accent: "#fff7ed", textDark: "#7c2d12", borderLight: "#fb923c" },
+        { name: "Void Violet (Light)", primary: "#7c3aed", secondary: "#ddd6fe", accent: "#f5f3ff", textDark: "#4c1d95", borderLight: "#a78bfa" }
     ];
 
     const layoutProfiles = [

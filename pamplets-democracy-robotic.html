@@ -250,7 +250,7 @@
             cursor: pointer;
             font-size: 0.7rem;
         }
-        .neon-toolbar {
+        .neon-toolbar { 
             display: none;
             gap: 8px;
             background: rgba(0,20,30,0.8);
@@ -263,6 +263,7 @@
         }
         .neon-fmt-btn { background:transparent; border:1px solid #0ff; color:#0ff; cursor:pointer; padding:4px 8px; border-radius:4px; font-weight:bold; }
         .neon-fmt-btn:hover { background: rgba(0,255,255,0.2); }
+        .neon-select { background: black; color: #0ff; border: 1px solid #0ff; border-radius: 4px; padding: 2px; font-family: monospace; }
 
         /* App Nav */
         .nav-wrapper { display: flex; justify-content: center; margin-bottom: 2rem; width: 100%; }
@@ -350,6 +351,17 @@
                 <button class="neon-fmt-btn" onmousedown="event.preventDefault();" onclick="document.execCommand('justifyRight',false,null)">⮕</button>
                 <div style="width:1px; height:20px; background:#0ff; margin:0 5px; opacity:0.5;"></div>
                 <input type="color" value="#00ffff" onchange="document.execCommand('foreColor',false,this.value)" style="width:30px; height:30px; padding:0; border:1px solid cyan; background:black; cursor:pointer;">
+                <div style="width:1px; height:20px; background:#0ff; margin:0 5px; opacity:0.5;"></div>
+                <select class="neon-select" onchange="document.execCommand('fontSize',false,this.value); this.value='';" title="Font Size">
+                    <option value="">SIZE</option>
+                    <option value="1">XS</option>
+                    <option value="2">S</option>
+                    <option value="3">M</option>
+                    <option value="4">L</option>
+                    <option value="5">XL</option>
+                    <option value="6">XXL</option>
+                    <option value="7">MAX</option>
+                </select>
             </div>
             <div id="pamphletContainer" class="size-m">
                 <!-- dynamic pamphlet -->
@@ -365,7 +377,13 @@
         { name: "MAGENTA PROTOCOL", primary: "#f0f", secondary: "#a020f0", accent: "#2a0e3a", textDark: "#ffe6ff", borderGlow: "#f0f", neonAccent: "#0ff", cardBg: "rgba(30, 0, 40, 0.7)" },
         { name: "ELECTRIC LIME", primary: "#aaff00", secondary: "#4c7a1a", accent: "#1a2a00", textDark: "#f4ffe0", borderGlow: "#b5ff00", neonAccent: "#0ff", cardBg: "rgba(20, 30, 0, 0.65)" },
         { name: "ORACLE ORANGE", primary: "#ff5e00", secondary: "#b13e00", accent: "#2a1808", textDark: "#fff0e0", borderGlow: "#ff8c00", neonAccent: "#ff00aa", cardBg: "rgba(30, 12, 4, 0.7)" },
-        { name: "DEEP VOID VIOLET", primary: "#b967ff", secondary: "#6a1b9a", accent: "#15002b", textDark: "#f0e6ff", borderGlow: "#c084fc", neonAccent: "#0ff", cardBg: "rgba(12, 0, 24, 0.8)" }
+        { name: "DEEP VOID VIOLET", primary: "#b967ff", secondary: "#6a1b9a", accent: "#15002b", textDark: "#f0e6ff", borderGlow: "#c084fc", neonAccent: "#0ff", cardBg: "rgba(12, 0, 24, 0.8)" },
+        // Classic Themes adapted for Dark/Cyber Mode
+        { name: "JUSTICE PURPLE (Dark)", primary: "#a78bfa", secondary: "#7c3aed", accent: "#2e1065", textDark: "#f5f3ff", borderGlow: "#8b5cf6", neonAccent: "#fff", cardBg: "rgba(20, 10, 40, 0.8)" },
+        { name: "BOLD RED (Dark)", primary: "#f87171", secondary: "#ef4444", accent: "#450a0a", textDark: "#fef2f2", borderGlow: "#dc2626", neonAccent: "#fff", cardBg: "rgba(40, 10, 10, 0.8)" },
+        { name: "BLUE TRUST (Dark)", primary: "#60a5fa", secondary: "#3b82f6", accent: "#172554", textDark: "#eff6ff", borderGlow: "#2563eb", neonAccent: "#fff", cardBg: "rgba(10, 20, 50, 0.8)" },
+        { name: "GRASS GREEN (Dark)", primary: "#4ade80", secondary: "#22c55e", accent: "#052e16", textDark: "#f0fdf4", borderGlow: "#16a34a", neonAccent: "#fff", cardBg: "rgba(5, 30, 10, 0.8)" },
+        { name: "SOVEREIGN GOLD (Dark)", primary: "#fbbf24", secondary: "#f59e0b", accent: "#451a03", textDark: "#fffbeb", borderGlow: "#d97706", neonAccent: "#fff", cardBg: "rgba(40, 25, 0, 0.8)" }
     ];
 
     const layoutProfiles = [
