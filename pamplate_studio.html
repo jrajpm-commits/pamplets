@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Democracy Pamphlet Studio | Dynamic Template Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e2e8f0;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.5rem;
+            color: #0f172a;
+        }
+
+        /* main layout */
+        .dashboard {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .studio-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .controls {
+            flex: 1.2;
+            min-width: 260px;
+            background: white;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .preview-area {
+            flex: 3;
+            min-width: 320px;
+        }
+
+        /* control styling */
+        .ctrl-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .ctrl-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #334155;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 1rem;
+            border: 1px solid #cbd5e1;
+            font-family: inherit;
+            background: #fefefe;
+            transition: 0.2s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 2px rgba(124,58,237,0.2);
+        }
+
+        .color-swatch {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .color-opt {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.1s;
+        }
+        .color-opt.active {
+            border-color: black;
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+        }
+        .template-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .template-badge.active-temp {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-reset {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .btn-reset:hover {
+            background: #0f172a;
+        }
+
+        /* pamphlet card wrapper */
+        .pamphlet-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        /* dynamic sizing */
+        .pamphlet-inner {
+            transition: all 0.2s;
+        }
+
+        .size-s {
+            max-width: 380px;
+            margin: 0 auto;
+        }
+        .size-m {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .size-l {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .size-full {
+            max-width: 100%;
+        }
+
+        /* base template styles */
+        .template-classic {
+            font-family: 'Inter', sans-serif;
+        }
+        .template-bold {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.3px;
+        }
+        .template-elegant {
+            font-family: 'Georgia', serif;
+        }
+
+        /* shared pamphlet layout */
+        .pamphlet-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .pamphlet-panel {
+            padding: 1.8rem;
+            flex: 1 1 220px;
+            border-right: 1px solid rgba(0,0,0,0.08);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        .pamphlet-panel:last-child {
+            border-right: none;
+        }
+        @media (max-width: 640px) {
+            .pamphlet-panel {
+                flex: 1 1 100%;
+                border-right: none;
+            }
+        }
+
+        .logo-placeholder {
+            border: 2px dashed currentColor;
+            opacity: 0.8;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255,255,240,0.2);
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 0.75rem;
+        }
+        .meeting-blank {
+            background: rgba(0,0,0,0.04);
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        hr {
+            margin: 1rem 0;
+        }
+        button.download-btn {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 0.8rem;
+        }
+        .profile-tag {
+            display: inline-block;
+            background: #eef2ff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <h1 style="font-weight: 700; margin-bottom: 0.25rem;">✊ Pamphlet Forge — Democracy & Rule of Law</h1>
+    <p style="margin-bottom: 1.5rem; color: #334155;">Generate variations: templates, colors, sizes, text profiles</p>
+
+    <div class="studio-panel">
+        <!-- left controls -->
+        <div class="controls">
+            <div class="ctrl-group">
+                <label>🎨 Color Theme</label>
+                <div class="color-swatch" id="colorSwatches"></div>
+            </div>
+            <div class="ctrl-group">
+                <label>📐 Pamphlet Size</label>
+                <select id="sizeSelect">
+                    <option value="size-s">Small (card style)</option>
+                    <option value="size-m" selected>Medium (classic leaflet)</option>
+                    <option value="size-l">Large (wide format)</option>
+                    <option value="size-full">Full bleed / poster</option>
+                </select>
+            </div>
+            <div class="ctrl-group">
+                <label>✍️ Typography Template</label>
+                <select id="fontTemplateSelect">
+                    <option value="template-classic">Classic — Inter clean</option>
+                    <option value="template-bold">Bold Voice — heavy contrast</option>
+                    <option value="template-elegant">Elegant — Serif justice</option>
+                </select>
+            </div>
+            <div class="ctrl-group">
+                <label>📄 Layout Profile (card/section variation)</label>
+                <div id="profileList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+            <div class="ctrl-group">
+                <label>✏️ Custom Headline / Call (optional)</label>
+                <input type="text" id="customHeadline" placeholder="e.g., RISE UP: Defend Democracy Now">
+            </div>
+            <div class="ctrl-group">
+                <label>📝 Meeting Details (leave blanks if you want)</label>
+                <textarea id="meetingDetailsOverride" rows="3" placeholder="Date: _____&#10;Time: _____&#10;Location: _____&#10;RSVP: _____"></textarea>
+            </div>
+            <button class="btn-reset" id="resetToDefault">⟳ Reset to default message & colors</button>
+            <button class="btn-reset" id="downloadPamphlet" style="background: #4f46e5; margin-top: 10px;">⬇️ Download as PNG (screenshot style)</button>
+            <p style="font-size: 11px; margin-top: 12px; color: #475569;">*Logo space auto-generated. Blanks ready for your meeting info.</p>
+        </div>
+
+        <!-- preview -->
+        <div class="preview-area">
+            <div id="pamphletContainer" class="size-m">
+                <!-- dynamic pamphlet injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- JSON based templates, profiles, color themes ----------
+    const colorThemes = [
+        { name: "Justice Purple", primary: "#5b21b6", secondary: "#c4b5fd", accent: "#ede9fe", textDark: "#1e1b4b", borderLight: "#8b5cf6" },
+        { name: "Bold Red/White", primary: "#b91c1c", secondary: "#fecaca", accent: "#fff5f5", textDark: "#7f1a1a", borderLight: "#ef4444" },
+        { name: "Deep Blue Trust", primary: "#1e3a8a", secondary: "#bfdbfe", accent: "#eff6ff", textDark: "#0c2e6e", borderLight: "#3b82f6" },
+        { name: "Grassroots Green", primary: "#166534", secondary: "#bbf7d0", accent: "#f0fdf4", textDark: "#14532d", borderLight: "#22c55e" },
+        { name: "Sovereign Gold", primary: "#b45309", secondary: "#fed7aa", accent: "#fffbeb", textDark: "#7c2d12", borderLight: "#f59e0b" }
+    ];
+
+    const layoutProfiles = [
+        { id: "profile_radical", name: "🔥 Eradicate Nonsense", headline: "ERADICATE THE NONSENSE", sub: "Laws for the rich? Never again.", extraTag: "Economic Justice Focus" },
+        { id: "profile_ruleoflaw", name: "⚖️ Rule of Law First", headline: "ONE LAW FOR ALL", sub: "No one above justice. Restore accountability.", extraTag: "Legal Integrity" },
+        { id: "profile_equality", name: "🌈 Equality & Rise", headline: "VOICE OF RISE", sub: "Equality across all social classes. Democracy rightful thing.", extraTag: "Inclusive Power" },
+        { id: "profile_democracy", name: "🏛️ Defenders of Democracy", headline: "DEMOCRACY IS US", sub: "Reclaim the people's house. Fight oligarchy.", extraTag: "Citizen Assembly" }
+    ];
+
+    // default content (principles + meeting blanks)
+    const defaultPamphletContent = {
+        panel1Head: "DEMOCRACY IS NOT A SPECTATOR SPORT.",
+        panel1Sub: "It is time to reclaim the rule of law. Reject legislation written for the few at the expense of the many. For the rightful voice of the people to rise.",
+        panel2Title: "Why We Rise",
+        panel2Bullets: [
+            "Rule of Law: Must apply equally to all, not bent for the powerful.",
+            "Economic Justice: No laws that benefit the rich while crushing working classes.",
+            "Eradicate Nonsense: Dismantle corruption and systemic rot.",
+            "Equality & Voice: True democracy demands equal say for every social class."
+        ],
+        panel3Title: "A Call to Rise: Organizing Assembly",
+        panel3Text: "Join the movement dedicated to restoring democracy, enforcing rule of law, and fighting for dignity across all social classes. If you believe the people's voice should be louder than lobbyists, this gathering is yours.",
+        agenda: "1. Defining the mission • 2. Target unjust laws • 3. Direct action strategy",
+        meetingBlanks: "📅 DATE: ___________  🕒 TIME: ___________\n📍 LOCATION: ___________   🌐 VIRTUAL LINK: ___________\n✉️ RSVP / CONTACT: ___________",
+        logoText: "[ YOUR LOGO HERE ]"
+    };
+
+    let currentColorIdx = 2;   // deep blue default
+    let currentProfile = layoutProfiles[2]; // equality profile
+    let currentSize = "size-m";
+    let currentFontTemplate = "template-classic";
+    let customHeadline = "";
+    let customMeetingText = "";
+
+    // DOM elements
+    const container = document.getElementById("pamphletContainer");
+    const sizeSelect = document.getElementById("sizeSelect");
+    const fontSelect = document.getElementById("fontTemplateSelect");
+    const colorSwatchesDiv = document.getElementById("colorSwatches");
+    const profileListDiv = document.getElementById("profileList");
+    const customHeadlineInput = document.getElementById("customHeadline");
+    const meetingOverride = document.getElementById("meetingDetailsOverride");
+    const resetBtn = document.getElementById("resetToDefault");
+    const downloadBtn = document.getElementById("downloadPamphlet");
+
+    // build color swatches
+    function renderColorSwatches() {
+        colorSwatchesDiv.innerHTML = "";
+        colorThemes.forEach((theme, idx) => {
+            const swatch = document.createElement("div");
+            swatch.className = `color-opt ${currentColorIdx === idx ? 'active' : ''}`;
+            swatch.style.backgroundColor = theme.primary;
+            swatch.title = theme.name;
+            swatch.addEventListener("click", () => {
+                currentColorIdx = idx;
+                renderColorSwatches();
+                renderPamphlet();
+            });
+            colorSwatchesDiv.appendChild(swatch);
+        });
+    }
+
+    function renderProfiles() {
+        profileListDiv.innerHTML = "";
+        layoutProfiles.forEach(prof => {
+            const badge = document.createElement("span");
+            badge.className = `template-badge ${currentProfile.id === prof.id ? 'active-temp' : ''}`;
+            badge.innerText = prof.name;
+            badge.addEventListener("click", () => {
+                currentProfile = prof;
+                renderProfiles();
+                renderPamphlet();
+            });
+            profileListDiv.appendChild(badge);
+        });
+    }
+
+    function getActiveColors() {
+        return colorThemes[currentColorIdx];
+    }
+
+    function renderPamphlet() {
+        const colors = getActiveColors();
+        const profile = currentProfile;
+        let headlineText = customHeadlineInput.value.trim() !== "" ? customHeadlineInput.value.trim() : profile.headline;
+        let meetingTextRaw = meetingOverride.value.trim() !== "" ? meetingOverride.value.trim() : defaultPamphletContent.meetingBlanks;
+        
+        // Build dynamic panels
+        const panel1Head = headlineText;
+        const panel1Sub = profile.sub + " • " + defaultPamphletContent.panel1Sub;
+        
+        // bullet list from default + extra flavor from profile
+        let bulletItems = [...defaultPamphletContent.panel2Bullets];
+        if (profile.id === "profile_radical") bulletItems.push("✊ Smash the machine: end corporate capture");
+        if (profile.id === "profile_ruleoflaw") bulletItems.push("⚖️ Independent judiciary, equal enforcement");
+        if (profile.id === "profile_equality") bulletItems.push("🏳️‍🌈 Bridging social classes, universal dignity");
+        if (profile.id === "profile_democracy") bulletItems.push("🗳️ Fair representation, end gerrymandering");
+
+        const panel3Title = "📢 " + defaultPamphletContent.panel3Title;
+        const agendaHtml = `<div class="profile-tag" style="margin: 0.5rem 0;">⚡ ${profile.extraTag} • ${defaultPamphletContent.agenda}</div>`;
+
+        // meeting blanks styled
+        const meetingHtml = `<div class="meeting-blank" style="background: ${colors.accent}; border-left: 4px solid ${colors.primary};">✍️ <strong>MEETING DETAILS (fill the blanks)</strong><br>${meetingTextRaw.replace(/\n/g, '<br>')}</div>`;
+        
+        const logoHtml = `<div class="logo-placeholder" style="border-color: ${colors.primary}; color: ${colors.primary};">🏛️ ${defaultPamphletContent.logoText} — [SPACE FOR YOUR LOGO]</div>`;
+
+        const htmlContent = `
+            <div class="pamphlet-card" style="background: white; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);">
+                <div class="pamphlet-inner ${currentFontTemplate}" style="color: ${colors.textDark};">
+                    <div class="pamphlet-grid">
+                        <!-- Panel 1: Front cover / hero -->
+                        <div class="pamphlet-panel" style="background: ${colors.primary}; color: white; border-right: 1px solid rgba(255,255,255,0.2);">
+                            ${logoHtml.replace(`border-color: ${colors.primary}`, `border-color: white; color: white; background: rgba(255,255,255,0.15);`)}
+                            <h1 style="font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; line-height: 1.2;">${panel1Head}</h1>
+                            <p style="font-size: 0.95rem; opacity: 0.92;">${panel1Sub}</p>
+                            <hr style="margin: 1rem 0; border-color: rgba(255,255,255,0.3);">
+                            <div style="font-size: 0.8rem; font-weight: 500;">✊ #VoiceOfRise  •  RuleOfLaw</div>
+                        </div>
+                        <!-- Panel 2: Diagnosis -->
+                        <div class="pamphlet-panel" style="background: ${colors.accent};">
+                            <h2 style="color: ${colors.primary}; border-left: 4px solid ${colors.primary}; padding-left: 0.6rem;">📌 ${defaultPamphletContent.panel2Title}</h2>
+                            <ul style="margin-top: 0.8rem; list-style-type: none; padding-left: 0;">
+                                ${bulletItems.map(item => `<li style="margin-bottom: 0.6rem; display: flex; gap: 0.5rem;"><span style="color: ${colors.primary}; font-weight: bold;">➤</span> ${item}</li>`).join('')}
+                            </ul>
+                            <div style="margin-top: 1rem; font-weight: 600; background: white; border-radius: 1rem; padding: 0.6rem; font-size: 0.8rem; text-align: center; color: ${colors.primary};">⚡ Eradicate the nonsense — equality now</div>
+                        </div>
+                        <!-- Panel 3: Call to action -->
+                        <div class="pamphlet-panel" style="background: white;">
+                            <h3 style="color: ${colors.primary};">${panel3Title}</h3>
+                            <p style="font-size: 0.85rem;">${defaultPamphletContent.panel3Text}</p>
+                            ${agendaHtml}
+                            ${meetingHtml}
+                            <div style="margin-top: 0.8rem; font-size: 0.7rem; text-align: center; background: ${colors.secondary}; padding: 0.4rem; border-radius: 2rem;">
+                                Together we are the voice of rise. Restore the rightful thing.
+                            </div>
+                        </div>
+                        <!-- Panel 4: extra blank / RSVP details -->
+                        <div class="pamphlet-panel" style="background: ${colors.secondary}20; border-bottom: none;">
+                            <div style="text-align: center;">
+                                <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem;">🏛️ PARTICIPATE</div>
+                                <div class="meeting-blank" style="background: white; margin-bottom: 0.6rem;">📢 Bring your voice, share widely. Democracy requires you.</div>
+                                <div style="font-size: 0.7rem;">[SPACE FOR CONTACT / SOCIALS]</div>
+                                <div style="margin-top: 1rem;"><span style="background: ${colors.primary}; color: white; padding: 0.2rem 1rem; border-radius: 2rem;">#RiseForDemocracy</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = htmlContent;
+        // apply size class
+        container.className = currentSize;
+    }
+
+    // sync controls and re-render
+    function syncFromUI() {
+        currentSize = sizeSelect.value;
+        currentFontTemplate = fontSelect.value;
+        renderPamphlet();
+    }
+
+    function resetToDefault() {
+        currentColorIdx = 2; // deep blue trust
+        currentProfile = layoutProfiles[2]; // equality
+        currentSize = "size-m";
+        currentFontTemplate = "template-classic";
+        customHeadlineInput.value = "";
+        meetingOverride.value = defaultPamphletContent.meetingBlanks;
+        sizeSelect.value = "size-m";
+        fontSelect.value = "template-classic";
+        renderColorSwatches();
+        renderProfiles();
+        syncFromUI();
+    }
+
+    // download as PNG using html2canvas (we need to inject library dynamically or use built-in? we'll add CDN)
+    function downloadPamphletImage() {
+        const element = document.querySelector(".pamphlet-card");
+        if (!element) return;
+        if (typeof html2canvas === 'undefined') {
+            alert("Please wait, loading html2canvas library... Download will be available in 2 seconds. Try again.");
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+            script.onload = () => { alert("Library ready! Click download again."); };
+            document.head.appendChild(script);
+            return;
+        }
+        html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'pamphlet-democracy.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }).catch(err => alert("screenshot error: " + err));
+    }
+
+    // Event listeners
+    sizeSelect.addEventListener("change", syncFromUI);
+    fontSelect.addEventListener("change", syncFromUI);
+    customHeadlineInput.addEventListener("input", () => renderPamphlet());
+    meetingOverride.addEventListener("input", () => renderPamphlet());
+    resetBtn.addEventListener("click", resetToDefault);
+    downloadBtn.addEventListener("click", downloadPamphletImage);
+    
+    // init
+    function init() {
+        renderColorSwatches();
+        renderProfiles();
+        meetingOverride.value = defaultPamphletContent.meetingBlanks;
+        syncFromUI();
+    }
+    init();
+</script>
+<!-- include html2canvas for PNG export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BMjQ8Gm5m4R+aQdgnzNq/OFjvK2U/fA/YBjCzUEvihhP9Z1N4i3OeGm4xT8f/JkhsVh9TqfGQlslxLR8aRA8UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body>
+</html>
